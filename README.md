@@ -9,3 +9,7 @@ the inference pipeline is from [diffusers](https://github.com/huggingface/diffus
 |-------------- | -------------- | -------------- |
 | [RePaint](https://arxiv.org/abs/2201.09865)    | Face     | Inpainting |
 | [StableDiffusion](https://arxiv.org/abs/2112.10752)    | Natural Image |  Inpainting  |
+
+## Other reference
+
+- https://huggingface.co/docs/diffusers/api/pipelines/stable\_diffusion\_2

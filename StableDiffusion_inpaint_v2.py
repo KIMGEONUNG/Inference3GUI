@@ -10,8 +10,7 @@ from diffusers import RePaintPipeline, RePaintScheduler
 from pycomar.images import show3plt
 import gradio as gr
 import numpy as np
-from diffusers import (
-    StableDiffusionInpaintPipeline, )
+from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 
 
 def download_image(url):
@@ -23,12 +22,14 @@ class System(object):
 
     def __init__(self):
 
-        # ckpt = "runwayml/stable-diffusion-v1-5"
-        ckpt = "CompVis/stable-diffusion-v1-4"
-        ckpt = "runwayml/stable-diffusion-inpainting"
-        self.pipe = StableDiffusionInpaintPipeline.from_pretrained(ckpt).to(
-            "cuda")
-        self.generator = torch.Generator(device="cuda").manual_seed(0)
+        ##############################################################################################
+        repo_id = "stabilityai/stable-diffusion-2-inpainting"
+        self.pipe = DiffusionPipeline.from_pretrained(repo_id).to("cuda")
+            # repo_id, torch_dtype=torch.float16, revision="fp16").to("cuda")
+        self.pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+            self.pipe.scheduler.config)
+
+        ##############################################################################################
 
         # Construct UI
         img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
@@ -46,7 +47,8 @@ class System(object):
                         view_mask = gr.Image(label="Mask", interactive=False)
                     with gr.Row():
                         prompt = gr.Textbox(
-                            value="a mecha robot sitting on a bench",
+                            value=
+                            "Face of a yellow cat, high resolution, sitting on a park bench",
                             label="Text Prompt")
                         prompt_n = gr.Textbox(
                             value=
@@ -97,19 +99,13 @@ class System(object):
         mask = PIL.Image.fromarray(mask)
 
         # Inference
-        guidance_scale = 7.5
-
-        images = self.pipe(
-            prompt=prompt,
-            negative_prompt=prompt_n,
-            image=img,
-            mask_image=mask,
-            guidance_scale=guidance_scale,
-            strength=strength,
-            generator=self.generator,
-            num_images_per_prompt=num_samples,
-        ).images
-
+        images = self.pipe(prompt=prompt,
+                           negative_prompt=prompt_n,
+                           image=img,
+                           mask_image=mask,
+                           num_images_per_prompt=num_samples,
+                           strength=strength,
+                           num_inference_steps=25).images
         return images
 
 
